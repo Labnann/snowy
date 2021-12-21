@@ -1,6 +1,7 @@
 import {
     AxesHelper,
-    DirectionalLight, Mesh,
+    Color,
+    DirectionalLight, FogExp2, Mesh,
     MeshBasicMaterial,
     MeshPhongMaterial,
     PerspectiveCamera,
@@ -15,6 +16,12 @@ let canvas = document.querySelector("#c") as HTMLCanvasElement;
 const renderer = new WebGLRenderer({ canvas });
 const camera = new PerspectiveCamera(40, 2, 0.1, 1000);
 const controls = new OrbitControls(camera, renderer.domElement);
+const scene = new Scene();
+
+{
+    scene.fog = new FogExp2(0x555555, .01);
+    scene.background = new Color(0x111111)
+}
 
 {
     controls.target.set(0, 10, 0);
@@ -29,7 +36,6 @@ const controls = new OrbitControls(camera, renderer.domElement);
 camera.position.set(0, 10, 30);
 //camera.lookAt(0, 0, 0);
 
-const scene = new Scene();
 {
     const plane = new Mesh(new PlaneBufferGeometry(2000, 2000, 2, 2), new MeshBasicMaterial({ color: 0x999999 }));
     scene.add(plane);
