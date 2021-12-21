@@ -1,17 +1,25 @@
 const path = require('path');
 
-module.exports ={
-    mode: "development",
+module.exports = {
+    mode: "production",
     entry: "./src/index.ts",
-    devtool: "eval-source-map",
+    devtool: false,
 
     module: {
-        rules:[
+        rules: [
             {
-            test: /\.ts$/,
-            use: 'ts-loader',
-            include: [path.resolve(__dirname,'src')]
-         }
+                test: /\.ts$/,
+                use: 'ts-loader',
+                include: [path.resolve(__dirname, 'src')]
+            },
+            
+            {
+                test: /\.(glsl|vs|fs|vert|frag)$/,
+                exclude: /node_modules/,
+                use: [
+                    'raw-loader'
+                ]
+            }
         ]
     },
 
@@ -19,12 +27,12 @@ module.exports ={
         extensions: ['.ts', '.js', '.json']
     },
 
-    output:{
-        filename:'bundle.js',
-        path:path.resolve(__dirname,'public')
+    output: {
+        filename: 'bundle.js',
+        path: path.resolve(__dirname, 'public')
     },
 
     devServer: {
         contentBase: path.join(__dirname, 'public'),
-      }
+    }
 }

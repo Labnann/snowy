@@ -1,8 +1,10 @@
 import {
+    AdditiveBlending,
     AmbientLight,
     AxesHelper,
+    BufferGeometry,
     Color,
-    DirectionalLight, FogExp2, Group, Mesh,
+    DirectionalLight, Float32BufferAttribute, FogExp2, Group, Mesh,
     MeshBasicMaterial,
     MeshPhongMaterial,
 
@@ -10,15 +12,24 @@ import {
     PlaneBufferGeometry,
     PointLight,
     PointLightHelper,
+    Points,
+    PointsMaterial,
     Renderer, Scene,
     SphereBufferGeometry,
+    TextureLoader,
     WebGLRenderer
 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
 
-let canvas = document.querySelector("#c") as HTMLCanvasElement;
+
+let canvas = document.createElement("canvas");
+canvas.id = "c";
+//@ts-ignore
+document.getElementById("body").prepend(canvas);
+canvas.style.cssText = " overflow:hidden; position:fixed; height: 100%; width: 100%; "
+
 const renderer = new WebGLRenderer({ canvas });
 const camera = new PerspectiveCamera(40, 2, 0.1, 500);
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -26,7 +37,7 @@ const scene = new Scene();
 
 {
     scene.fog = new FogExp2(0x555555, .01250);
-    scene.background = new Color(0x444444)
+    scene.background = new Color(0x333333)
 }
 
 {
@@ -43,13 +54,6 @@ const scene = new Scene();
 camera.position.set(0, 10, 60);
 camera.lookAt(0, 0, 0);
 
-// {
-//     const plane = new Mesh(new PlaneBufferGeometry(2000, 2000, 2, 2), new MeshBasicMaterial({ color: 0x999999 }));
-//     scene.add(plane);
-//     plane.rotateX(-Math.PI / 2)
-//     // plane.position.set(0,-10,0);
-
-// }
 
 
 
@@ -57,20 +61,20 @@ camera.lookAt(0, 0, 0);
     let tree: Group;
     const objLoader = new OBJLoader();
     const mtlLoader = new MTLLoader();
-   
-    mtlLoader.load("../models/lowpoly/tree.mtl", materials => {
-        
+
+    mtlLoader.load("https://files.catbox.moe/h3u12c.mtl", materials => {
+
         materials.preload();
-        
+
         console.log(materials)
         objLoader.setMaterials(materials);
-        objLoader.load("../models/lowpoly/tree.obj", obj => {
+        objLoader.load("https://files.catbox.moe/dnbuex.obj", obj => {
             tree = obj;
             scene.add(tree);
             tree.scale.set(5, 5, 5);
 
             //@ts-ignore
-            tree.children[107].material.shininess=0
+            tree.children[107].material.shininess = 0
             //@ts-ignore
             console.log(tree.children)
         })
@@ -83,16 +87,16 @@ camera.lookAt(0, 0, 0);
 
 {
 
-    let ambientLight = new AmbientLight(0xffffff,0.3);
+    let ambientLight = new AmbientLight(0xffffff, 0.3);
     scene.add(ambientLight);
 
 
-    let pointLight = new PointLight(0xFFFFDD,1.1);
-    pointLight.position.set(3,25,3);
+    let pointLight = new PointLight(0xFFFFDD, 1.1);
+    pointLight.position.set(3, 25, 3);
     scene.add(pointLight);
 
-    
-    
+
+
 }
 
 
@@ -106,6 +110,44 @@ function resizeRendererToDisplaySize(renderer: Renderer) {
     }
 
     return needResize;
+}
+
+
+{
+    const snowGeometry = new BufferGeometry();
+    const vertices = [];
+    const sprite = new TextureLoader().load("https://media.discordapp.net/attachments/727611031106486307/867505288784117820/2.png");
+    for (let i = 0; i < 1000; i++) {
+
+        const x = 200 * Math.random() - 100;
+        const y = 200 * Math.random() ;
+        const z = 200 * Math.random() - 100;
+
+        vertices.push(x, y, z);
+
+    }
+
+    snowGeometry.setAttribute('position', new Float32BufferAttribute(vertices, 3));
+    
+
+    let snowMaterial = new PointsMaterial(
+         {
+       size: 10,
+       sizeAttenuation: true,
+       transparent: true,
+       color: "#FF88CC",
+       depthWrite: false,
+       blending: AdditiveBlending,
+       vertexColors:true
+    }
+    );
+    snowMaterial.color.setHSL(1.0, 0.3, 0.7);
+    snowMaterial.alphaMap = sprite;
+
+    const particles = new Points(snowGeometry, snowMaterial);
+    scene.add(particles);
+
+
 }
 
 
