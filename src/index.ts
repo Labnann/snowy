@@ -1,27 +1,27 @@
 import {
     AdditiveBlending,
     AmbientLight,
-    AxesHelper,
+
     BufferGeometry,
     Color,
-    DirectionalLight, Float32BufferAttribute, FogExp2, Group, Mesh,
-    MeshBasicMaterial,
-    MeshPhongMaterial,
+    Float32BufferAttribute, FogExp2, Group,
+
 
     PerspectiveCamera,
-    PlaneBufferGeometry,
+
     PointLight,
-    PointLightHelper,
+
     Points,
     PointsMaterial,
     Renderer, Scene,
-    SphereBufferGeometry,
+
     TextureLoader,
     WebGLRenderer
 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
 
 
 let canvas = document.createElement("canvas");
@@ -56,27 +56,28 @@ camera.lookAt(0, 0, 0);
 
 
 
-function loadModel(objURL : string, mtlURL: string)
-{
+function loadOBJ(
+    mtlURL: string,
+    objURL: string,
+    resolveGeometry: { (geometry: Group): void } = function test(geometry: Group) {
+        return;
+    }) {
     let geometry: Group;
     const objLoader = new OBJLoader();
     const mtlLoader = new MTLLoader();
 
-    mtlLoader.load(objURL, materials => {
+    mtlLoader.load(mtlURL, materials => {
 
         materials.preload();
 
-        console.log(materials)
+
         objLoader.setMaterials(materials);
-        objLoader.load(mtlURL, obj => {
+        objLoader.load(objURL, obj => {
             geometry = obj;
             scene.add(geometry);
             geometry.scale.set(5, 5, 5);
+            resolveGeometry(geometry);
 
-            //@ts-ignore
-            geometry.children[107].material.shininess = 0
-            //@ts-ignore
-            console.log(geometry.children)
         })
 
     })
@@ -84,7 +85,43 @@ function loadModel(objURL : string, mtlURL: string)
 
 }
 
-loadModel("https://files.catbox.moe/h3u12c.mtl", "https://files.catbox.moe/dnbuex.obj");
+
+function resolveSnowManGeometry(geometry: Group) {
+    geometry.position.set(-25, -2, 0);
+    geometry.rotateY(Math.PI / 3);
+}
+
+function resolveTreeGeometry(geometry: Group) {
+    //@ts-ignore
+    geometry.children[107].material.shininess = 0;
+    //@ts-ignore
+    geometry.children[106].material.emissive = {r: 1, g: .7, b:.3};
+    
+
+}
+
+function resolveGiftGeometry(geometry: Group) {
+    geometry.scale.set(.7, .7, .7);
+
+}
+
+loadOBJ("https://files.catbox.moe/h3u12c.mtl", "https://files.catbox.moe/dnbuex.obj", resolveTreeGeometry);
+loadOBJ("https://files.catbox.moe/qrxrb0.mtl", "https://files.catbox.moe/7i09rd.obj", resolveSnowManGeometry);
+{
+
+    const gltfLoader = new GLTFLoader();
+    gltfLoader.load("https://files.catbox.moe/npoief.gltf", (gltf) => {
+        gltf.scene.scale.set(.7, .7, .7);
+        gltf.scene.position.set(0, -5, 0);
+        scene.add(gltf.scene);
+    })
+
+}
+
+
+
+
+
 
 
 {
